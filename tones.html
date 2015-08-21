@@ -8,6 +8,8 @@
 
   <button id="one" class="key" onmousedown="dialTone(697.0, 1209.0)"  onmouseup="stop()" data-freq='697.0, 1209.0'>1</button>
 
+  <button id="test">test</button>
+
   <br>
   <input id="x" type="text" value="nil"></input>
   <br>
@@ -17,7 +19,15 @@
 
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <!-- togetherjs -->
+      <script>
+        TogetherJSConfig_findRoom = {prefix: "ztee", max: 3};
+        TogetherJSConfig_autoStart = true;
+        TogetherJSConfig_suppressJoinConfirmation = true;
+        TogetherJSConfig_storagePrefix = "tjs_ztee";
+      </script>
   <script src="https://togetherjs.com/togetherjs-min.js"></script>
+
   <script>
   var AudioContext = window.AudioContext || window.webkitAudioContext;
   var context = new AudioContext();
@@ -69,15 +79,51 @@
   });
 
   function handleOrientation(event) {
+    if (TogetherJS.running) {
+      TogetherJS.send({
+        type: 'orientation',
+        alpha: event.alpha,
+        beta: event.beta,
+        gamma: event.gamma
+      });
+    }
     var x = event.beta;  // In degree in the range [-180,180]
     var y = event.gamma; // In degree in the range [-90,90]
     var z = event.alpha; // In degree in the range [0,360]
     $('#x').val(x);
     $('#y').val(y);
     $('#z').val(z);
+
   }
 
   window.addEventListener('deviceorientation', handleOrientation);
+
+  $('#test').on("click", function(){
+    console.log('Test clicked');
+    if (TogetherJS.running) {
+      TogetherJS.send({
+        type: 'test-orientation',
+        alpha: 12.4,
+        beta: -11.2,
+        gamma: 0.04
+      });
+    }
+  });
+
+
+TogetherJS.hub.on('orientation', function (msg) {
+  if (!msg.sameUrl) {
+    return;
+  }
+  var x = msg.beta;  // In degree in the range [-180,180]
+  var y = msg.gamma; // In degree in the range [-90,90]
+  var z = msg.alpha; // In degree in the range [0,360]
+  $('#x').val(x);
+  $('#y').val(y);
+  $('#z').val(z);
+  console.log(msg);
+});
+
   </script>
 
 </body>
