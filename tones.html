@@ -59,6 +59,15 @@
     oscillator2.disconnect();
   }
 
+
+  TogetherJS.hub.on("cursor-click", function (msg) {
+    if (! msg.sameUrl) {
+      console.log("MSG cursor-click SAME URL");
+      return;
+    }
+    console.log("MSG cursor-click");
+  });
+
   function handleOrientation(event) {
     var x = event.beta;  // In degree in the range [-180,180]
     var y = event.gamma; // In degree in the range [-90,90]
