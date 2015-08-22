@@ -17,6 +17,8 @@
   <br>
   <input id="z" type="text" value="nil"></input>
 
+  <video width="256" height="256"></video>
+  <image id="jpg" width="256" height="256"></image>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <!-- togetherjs -->
@@ -27,11 +29,21 @@
         TogetherJSConfig_storagePrefix = "tjs_ztee";
       </script>
   <script src="https://togetherjs.com/togetherjs-min.js"></script>
-
+  <script src="adapter.js"></script>
   <script>
 
   var pulse = true;
   var beat_orientation = false;
+  var recordfn = function(){};
+
+  function videoTimer(){
+    setTimeout( function() {
+      videoTimer();
+      recordfn();
+    }, 1000 / 15 ); // 15fps
+  }
+
+  videoTimer();
 
   function heartbeat(){
     setTimeout( function() {
@@ -144,6 +156,54 @@ TogetherJS.hub.on('orientation', function (msg) {
   $('#y').val(y);
   $('#z').val(z);
   console.log(msg);
+});
+
+var constraint = { audio: false, video: { width: { facingMode: "user" } } };
+var recordCanvas;
+
+var p = navigator.mediaDevices.getUserMedia( constraint );
+
+p.then(function(mediaStream) {
+   var video = document.querySelector('video');
+   video.src = window.URL.createObjectURL(mediaStream);
+   video.play();
+   video.onloadedmetadata = function(e) {
+      // Do something with the video here.
+      console.log('have video metadata', video);
+      recordCanvas = document.createElement('canvas');
+      recordCanvas.width = video.width;
+      recordCanvas.height = video.height;
+      recordfn = function(){
+        recordCanvas.getContext('2d').drawImage(video, 0, 0, video.width, video.height);
+        var jpg = recordCanvas.toDataURL('image/jpeg', 50);
+        //$('#jpg')[0].src = jpg;
+        if (TogetherJS.running) {
+          TogetherJS.send({
+            type: 'video',
+            image: jpg,
+            alpha: 0.0,
+            beta: 0.0,
+            gamma: 0.0
+          });
+        }
+      }
+   };
+   video.onloadeddata = function(e) {
+      // Do something with the video here.
+      console.log('have videoWidth', video.videoWidth);
+      //recordCanvas = document.createElement('canvas');
+      //recordCanvas.width = video.width;  // or videoWidth
+      //recordCanvas.height = video.height; // or videoHeight
+   };
+});
+
+p.catch(function(e) { console.log(e.name); }); // always check for errors at the end.
+
+TogetherJS.hub.on('video', function (msg) {
+  if (!msg.sameUrl) {
+    return;
+  }
+  $('#jpg')[0].src = msg.jpg;
 });
 
   </script>
