@@ -33,12 +33,19 @@
   var pulse = true;
   var beat_orientation = false;
 
-  function heartbeat(){}
+  function heartbeat(){
     setTimeout( function() {
       heartbeat();
       pulse = !pulse;
       beat_orientation = true;
-    }, 500 );
+
+      if(pulse){
+        $('#test').css('background-color', 'red');
+      }else{
+        $('#test').css('background-color', 'white');
+      }
+    }, 1000 );
+  }
 
   var AudioContext = window.AudioContext || window.webkitAudioContext;
   var context = new AudioContext();
@@ -123,19 +130,7 @@
     }
   });
 
-var pulse = true;
 
-function heartbeat(){
-  setTimeout( function() {
-    heartbeat();
-    pulse = !pulse;
-    if(pulse){
-      $('#test').css('background-color', 'red');
-    }else{
-      $('#test').css('background-color', 'white');
-    }
-  }, 1000 );
-}
 
 TogetherJS.hub.on('orientation', function (msg) {
   if (!msg.sameUrl) {
