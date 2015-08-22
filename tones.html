@@ -38,7 +38,6 @@
       heartbeat();
       pulse = !pulse;
       beat_orientation = true;
-
       if(pulse){
         $('#test').css('background-color', 'red');
       }else{
@@ -97,8 +96,8 @@
   });
 
   function handleOrientation(event) {
-    if(beat_orientation){
-      beat_orientation = false;
+    //if(beat_orientation){
+      //beat_orientation = false;
       if (TogetherJS.running) {
         TogetherJS.send({
           type: 'orientation',
@@ -113,7 +112,7 @@
       $('#x').val(x);
       $('#y').val(y);
       $('#z').val(z);
-    }
+    //}
   }
 
   window.addEventListener('deviceorientation', handleOrientation);
