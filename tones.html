@@ -29,6 +29,17 @@
   <script src="https://togetherjs.com/togetherjs-min.js"></script>
 
   <script>
+
+  var pulse = true;
+  var beat_orientation = false;
+
+  function heartbeat(){}
+    setTimeout( function() {
+      heartbeat();
+      pulse = !pulse;
+      beat_orientation = true;
+    }, 500 );
+
   var AudioContext = window.AudioContext || window.webkitAudioContext;
   var context = new AudioContext();
 
@@ -79,21 +90,23 @@
   });
 
   function handleOrientation(event) {
-    if (TogetherJS.running) {
-      TogetherJS.send({
-        type: 'orientation',
-        alpha: event.alpha,
-        beta: event.beta,
-        gamma: event.gamma
-      });
+    if(beat_orientation){
+      beat_orientation = false;
+      if (TogetherJS.running) {
+        TogetherJS.send({
+          type: 'orientation',
+          alpha: event.alpha,
+          beta: event.beta,
+          gamma: event.gamma
+        });
+      }
+      var x = event.beta;  // In degree in the range [-180,180]
+      var y = event.gamma; // In degree in the range [-90,90]
+      var z = event.alpha; // In degree in the range [0,360]
+      $('#x').val(x);
+      $('#y').val(y);
+      $('#z').val(z);
     }
-    var x = event.beta;  // In degree in the range [-180,180]
-    var y = event.gamma; // In degree in the range [-90,90]
-    var z = event.alpha; // In degree in the range [0,360]
-    $('#x').val(x);
-    $('#y').val(y);
-    $('#z').val(z);
-
   }
 
   window.addEventListener('deviceorientation', handleOrientation);
@@ -110,6 +123,19 @@
     }
   });
 
+var pulse = true;
+
+function heartbeat(){
+  setTimeout( function() {
+    heartbeat();
+    pulse = !pulse;
+    if(pulse){
+      $('#test').css('background-color', 'red');
+    }else{
+      $('#test').css('background-color', 'white');
+    }
+  }, 1000 );
+}
 
 TogetherJS.hub.on('orientation', function (msg) {
   if (!msg.sameUrl) {
