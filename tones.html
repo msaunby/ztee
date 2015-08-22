@@ -43,8 +43,10 @@
       }else{
         $('#test').css('background-color', 'white');
       }
-    }, 1000 );
+    }, 500 );
   }
+
+  heartbeat();
 
   var AudioContext = window.AudioContext || window.webkitAudioContext;
   var context = new AudioContext();
@@ -96,8 +98,8 @@
   });
 
   function handleOrientation(event) {
-    //if(beat_orientation){
-      //beat_orientation = false;
+    if(beat_orientation){
+      beat_orientation = false;
       if (TogetherJS.running) {
         TogetherJS.send({
           type: 'orientation',
@@ -112,7 +114,7 @@
       $('#x').val(x);
       $('#y').val(y);
       $('#z').val(z);
-    //}
+    }
   }
 
   window.addEventListener('deviceorientation', handleOrientation);
