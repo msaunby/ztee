@@ -1,0 +1,29 @@
+<html>
+<head>
+  <title>ztee</title>
+</head>
+<body>
+<iframe src="https://appear.in/ztee-aaa" width="800" height="640" frameborder="0"></iframe>
+
+<!--
+<video autoplay="true" id="3ad83842-d194-43a3-b213-29d2f587242e" ng-class="{'inactive': client.status == 'connection_disconnected'}" ng-hide="client.error" vc-muted="client.isLocalClient" vc-splitscreen-is-aspect-ratio-source="true" vc-splitscreen-rotation="none" ng-src="blob:https%3A//appear.in/50b96ce8-6e6c-4b4e-b2b9-46af1d8146eb" class="video-stream camera" client="client" stream="stream" src="blob:https%3A//appear.in/50b96ce8-6e6c-4b4e-b2b9-46af1d8146eb">
+</video>
+-->
+<div>
+<button id="snapshot" onclick="getcamera()">Snapshot</button>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script>
+
+function getcamera(){
+  //var camera = $('video.camera'); //$( "iframe" ).find( "video" );
+  $('video').each(this.pause());
+  //console.log( camera );
+}
+
+</script>
+
+</body>
+</html>
