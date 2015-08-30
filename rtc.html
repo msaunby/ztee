@@ -61,7 +61,7 @@
         <!-- scripts used for video-conferencing -->
         <script src="//cdn.webrtc-experiment.com/firebase.js"> </script>
         <script src="//cdn.webrtc-experiment.com/RTCPeerConnection-v1.5.js"> </script>
-        <script src="//cdn.webrtc-experiment.com/video-conferencing/conference.js"> </script>
+        <script src="conference.js"> </script>
 
         <!-- script used to stylize video element -->
         <script src="//cdn.webrtc-experiment.com/getMediaElement.min.js"> </script>
@@ -94,17 +94,27 @@
 
                 <div>
                 <button id="snapshot" onclick="getcamera()">Snapshot</button>
+                <canvas id="snapcanv" style="width:512;height:256;"></canvas>
                 </div>
 
             </section>
 
             <script>
             function getcamera(){
-              var camera = $( "#videos-container" ).find( "video" );
-              //$('video').each(this.pause());
-              console.log( camera );
-              console.log( camera[0] );
-              camera[0].pause();
+              var camera = $( "#videos-container" ).find( "video" )[0];
+              var canvas = $( "#snapcanv" )[0];
+              var ctx = canvas.getContext('2d');
+              canvas.width = 960;
+              canvas.height = 480;
+              var circle_fraction = 10;
+              var aspect = camera.videoWidth / camera.videoHeight;
+              var outwidth = canvas.width / circle_fraction;
+              var outheight = outwidth / aspect;
+              var left_offset = (canvas.width - outwidth) / 2;
+              var top_offset = (canvas.height - outheight) / 2;
+              ctx.drawImage(camera, left_offset,top_offset,outwidth,outheight);
+              console.log( camera.videoWidth, camera.videoHeight );
+              //camera.pause();
             }
             </script>
 
