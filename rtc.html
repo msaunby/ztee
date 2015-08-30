@@ -5,291 +5,300 @@
 -->
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>WebRTC » video-conferencing ® Muaz Khan</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-        <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
-        <meta name="author" content="Muaz Khan">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<head>
+  <title></title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
-        <link rel="stylesheet" href="//cdn.webrtc-experiment.com/style.css">
+  <link rel="stylesheet" href="//cdn.webrtc-experiment.com/style.css">
 
-        <style>
-            audio, video {
-                -moz-transition: all 1s ease;
-                -ms-transition: all 1s ease;
+  <style>
+  audio, video {
+    -moz-transition: all 1s ease;
+    -ms-transition: all 1s ease;
 
-                -o-transition: all 1s ease;
-                -webkit-transition: all 1s ease;
-                transition: all 1s ease;
-                vertical-align: top;
-            }
+    -o-transition: all 1s ease;
+    -webkit-transition: all 1s ease;
+    transition: all 1s ease;
+    vertical-align: top;
+  }
+ </style>
 
-            input {
-                border: 1px solid #d9d9d9;
-                border-radius: 1px;
-                font-size: 2em;
-                margin: .2em;
-                width: 30%;
-            }
+  <script>
+  document.createElement('article');
+  document.createElement('footer');
+  </script>
 
-            .setup {
-                border-bottom-left-radius: 0;
-                border-top-left-radius: 0;
-                font-size: 102%;
-                height: 47px;
-                margin-left: -9px;
-                margin-top: 8px;
-                position: absolute;
-            }
+  <!-- scripts used for video-conferencing -->
+  <script src="//cdn.webrtc-experiment.com/firebase.js"> </script>
+  <script src="//cdn.webrtc-experiment.com/RTCPeerConnection-v1.5.js"> </script>
+  <script src="conference.js"> </script>
 
-            p { padding: 1em; }
+  <!-- script used to stylize video element -->
+  <script src="//cdn.webrtc-experiment.com/getMediaElement.min.js"> </script>
 
-            li {
-                border-bottom: 1px solid rgb(189, 189, 189);
-                border-left: 1px solid rgb(189, 189, 189);
-                padding: .5em;
-            }
-        </style>
-        <script>
-            document.createElement('article');
-            document.createElement('footer');
-        </script>
-
-        <!-- scripts used for video-conferencing -->
-        <script src="//cdn.webrtc-experiment.com/firebase.js"> </script>
-        <script src="//cdn.webrtc-experiment.com/RTCPeerConnection-v1.5.js"> </script>
-        <script src="conference.js"> </script>
-
-        <!-- script used to stylize video element -->
-        <script src="//cdn.webrtc-experiment.com/getMediaElement.min.js"> </script>
-
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-
-    </head>
-
-    <body>
-        <article>
-
-            <div class="github-stargazers"></div>
-
-            <!-- just copy this <section> and next script -->
-            <section class="experiment">
-                <section>
-                    <span>
-                        Private ?? <a href="/video-conferencing/" target="_blank" title="Open this link in new tab. Then your conference room will be private!"><code><strong id="unique-token">#123456789</strong></code></a>
-                    </span>
-
-                    <input type="text" id="conference-name">
-                    <button id="setup-new-room" class="setup">Setup New Conference</button>
-                </section>
-
-                <!-- list of all available conferencing rooms -->
-                <table style="width: 100%;" id="rooms-list"></table>
-
-                <!-- local/remote videos container -->
-                <div id="videos-container"></div>
-
-                <div>
-                <button id="snapshot" onclick="getcamera()">Snapshot</button>
-                <canvas id="snapcanv" style="width:512;height:256;"></canvas>
-                </div>
-
-            </section>
-
-            <script>
-            function getcamera(){
-              var camera = $( "#videos-container" ).find( "video" )[0];
-              var canvas = $( "#snapcanv" )[0];
-              var ctx = canvas.getContext('2d');
-              canvas.width = 960;
-              canvas.height = 480;
-              var circle_fraction = 10;
-              var aspect = camera.videoWidth / camera.videoHeight;
-              var outwidth = canvas.width / circle_fraction;
-              var outheight = outwidth / aspect;
-              var left_offset = (canvas.width - outwidth) / 2;
-              var top_offset = (canvas.height - outheight) / 2;
-              ctx.drawImage(camera, left_offset,top_offset,outwidth,outheight);
-              console.log( camera.videoWidth, camera.videoHeight );
-              //camera.pause();
-            }
-            </script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 
 
-            <script>
-                // Muaz Khan     - https://github.com/muaz-khan
-                // MIT License   - https://www.webrtc-experiment.com/licence/
-                // Documentation - https://github.com/muaz-khan/WebRTC-Experiment/tree/master/video-conferencing
+  <script type="text/javascript" src="http://threejs.org/build/three.min.js"></script>
+  <script type="text/javascript" src="http://threejs.org/examples/js/controls/TrackballControls.js"></script>
 
-                var config = {
-                    openSocket: function(config) {
-                        var channel = config.channel || location.href.replace( /\/|:|#|%|\.|\[|\]/g , '');
-                        var socket = new Firebase('https://webrtc.firebaseIO.com/' + channel);
-                        socket.channel = channel;
-                        socket.on("child_added", function(data) {
-                            config.onmessage && config.onmessage(data.val());
-                        });
-                        socket.send = function(data) {
-                            this.push(data);
-                        };
-                        config.onopen && setTimeout(config.onopen, 1);
-                        socket.onDisconnect().remove();
-                        return socket;
-                    },
-                    onRemoteStream: function(media) {
-                        var mediaElement = getMediaElement(media.video, {
-                            width: (videosContainer.clientWidth / 2) - 50,
-                            buttons: ['mute-audio', 'mute-video', 'full-screen', 'volume-slider']
-                        });
-                        mediaElement.id = media.streamid;
-                        videosContainer.insertBefore(mediaElement, videosContainer.firstChild);
-                    },
-                    onRemoteStreamEnded: function(stream, video) {
-                        if (video.parentNode && video.parentNode.parentNode && video.parentNode.parentNode.parentNode) {
-                            video.parentNode.parentNode.parentNode.removeChild(video.parentNode.parentNode);
-                        }
-                    },
-                    onRoomFound: function(room) {
-                        var alreadyExist = document.querySelector('button[data-broadcaster="' + room.broadcaster + '"]');
-                        if (alreadyExist) return;
+  <script src="http://threejs.org/examples/js/shaders/CopyShader.js"></script>
+  <script src="PaletteShader.js"></script>
+  <script src="http://threejs.org/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="http://threejs.org/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="http://threejs.org/examples/js/postprocessing/MaskPass.js"></script>
+  <script src="http://threejs.org/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="photosphere.js"></script>
+</head>
 
-                        if (typeof roomsList === 'undefined') roomsList = document.body;
+<body>
+  <article>
 
-                        var tr = document.createElement('tr');
-                        tr.innerHTML = '<td><strong>' + room.roomName + '</strong> shared a conferencing room with you!</td>' +
-                            '<td><button class="join">Join</button></td>';
-                        roomsList.insertBefore(tr, roomsList.firstChild);
+    <div class="github-stargazers"></div>
 
-                        var joinRoomButton = tr.querySelector('.join');
-                        joinRoomButton.setAttribute('data-broadcaster', room.broadcaster);
-                        joinRoomButton.setAttribute('data-roomToken', room.roomToken);
-                        joinRoomButton.onclick = function() {
-                            this.disabled = true;
+    <!-- just copy this <section> and next script -->
+    <section class="experiment">
+      <section>
+        <span>
+          Private ?? <a href="/video-conferencing/" target="_blank" title="Open this link in new tab. Then your conference room will be private!"><code><strong id="unique-token">#123456789</strong></code></a>
+        </span>
 
-                            var broadcaster = this.getAttribute('data-broadcaster');
-                            var roomToken = this.getAttribute('data-roomToken');
-                            captureUserMedia(function() {
-                                conferenceUI.joinRoom({
-                                    roomToken: roomToken,
-                                    joinUser: broadcaster
-                                });
-                            }, function() {
-                                joinRoomButton.disabled = false;
-                            });
-                        };
-                    },
-                    onRoomClosed: function(room) {
-                        var joinButton = document.querySelector('button[data-roomToken="' + room.roomToken + '"]');
-                        if (joinButton) {
-                            // joinButton.parentNode === <li>
-                            // joinButton.parentNode.parentNode === <td>
-                            // joinButton.parentNode.parentNode.parentNode === <tr>
-                            // joinButton.parentNode.parentNode.parentNode.parentNode === <table>
-                            joinButton.parentNode.parentNode.parentNode.parentNode.removeChild(joinButton.parentNode.parentNode.parentNode);
-                        }
-                    }
-                };
+        <input type="text" id="conference-name">
+        <button id="setup-new-room" class="setup">Setup New Conference</button>
+      </section>
 
-                function setupNewRoomButtonClickHandler() {
-                    btnSetupNewRoom.disabled = true;
-                    document.getElementById('conference-name').disabled = true;
-                    captureUserMedia(function() {
-                        conferenceUI.createRoom({
-                            roomName: (document.getElementById('conference-name') || { }).value || 'Anonymous'
-                        });
-                    }, function() {
-                        btnSetupNewRoom.disabled = document.getElementById('conference-name').disabled = false;
-                    });
-                }
+      <!-- list of all available conferencing rooms -->
+      <table style="width: 100%;" id="rooms-list"></table>
 
-                function captureUserMedia(callback, failure_callback) {
-                    var video = document.createElement('video');
+      <!-- local/remote videos container -->
+      <div id="videos-container"></div>
 
-                    getUserMedia({
-                        video: video,
-                        onsuccess: function(stream) {
-                            config.attachStream = stream;
-                            callback && callback();
+      <div>
+        <button id="snapshot" onclick="getcamera()">Snapshot</button>
 
-                            video.setAttribute('muted', true);
+      </div>
+    </section>
 
-                            var mediaElement = getMediaElement(video, {
-                                width: (videosContainer.clientWidth / 2) - 50,
-                                buttons: ['mute-audio', 'mute-video', 'full-screen', 'volume-slider']
-                            });
-                            mediaElement.toggle('mute-audio');
-                            videosContainer.insertBefore(mediaElement, videosContainer.firstChild);
-                        },
-                        onerror: function() {
-                            alert('unable to get access to your webcam');
-                            callback && callback();
-                        }
-                    });
-                }
 
-                var conferenceUI = conference(config);
+    <script>
+    function cameraZ(){
+      camera.position.z = Number($("#cameraZ").val());
+    }
 
-                /* UI specific */
-                var videosContainer = document.getElementById('videos-container') || document.body;
-                var btnSetupNewRoom = document.getElementById('setup-new-room');
-                var roomsList = document.getElementById('rooms-list');
+    function rotate(){
 
-                if (btnSetupNewRoom) btnSetupNewRoom.onclick = setupNewRoomButtonClickHandler;
+        var x = Number($("#rotationX").val()) * Math.PI / 180.0;
+        var y = Number($("#rotationY").val()) * Math.PI / 180.0;
+        var z = Number($("#rotationZ").val()) * Math.PI / 180.0;
 
-                function rotateVideo(video) {
-                    video.style[navigator.mozGetUserMedia ? 'transform' : '-webkit-transform'] = 'rotate(0deg)';
-                    setTimeout(function() {
-                        video.style[navigator.mozGetUserMedia ? 'transform' : '-webkit-transform'] = 'rotate(360deg)';
-                    }, 1000);
-                }
+        sphere.rotation.set( x, y, z, $("#euler").val());
+    }
 
-                (function() {
-                    var uniqueToken = document.getElementById('unique-token');
-                    if (uniqueToken)
-                        if (location.hash.length > 2) uniqueToken.parentNode.parentNode.parentNode.innerHTML = '<h2 style="text-align:center;"><a href="' + location.href + '" target="_blank">Share this link</a></h2>';
-                        else uniqueToken.innerHTML = uniqueToken.parentNode.parentNode.href = '#' + (Math.random() * new Date().getTime()).toString(36).toUpperCase().replace( /\./g , '-');
-                })();
+    function getcamera(){
+      var camera = $( "#videos-container" ).find( "video" )[0];
+      //var canvas = $( "#snapcanv" )[0];
+      var canvas = document.createElement('canvas');
+      canvas.width = 960;
+      canvas.height = 480;
+      var ctx = canvas.getContext('2d');
+      var circle_fraction = 10;
+      var aspect = camera.videoWidth / camera.videoHeight;
+      var outwidth = canvas.width / circle_fraction;
+      var outheight = outwidth / aspect;
+      var left_offset = (canvas.width - outwidth) / 2;
+      var top_offset = (canvas.height - outheight) / 2;
+      ctx.fillStyle = "white";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(camera, left_offset,top_offset,outwidth,outheight);
+      loadCanvas( canvas );
+      console.log( camera.videoWidth, camera.videoHeight );
+      //camera.pause();
+    }
+    </script>
 
-                function scaleVideos() {
-                    var videos = document.querySelectorAll('video'),
-                        length = videos.length, video;
 
-                    var minus = 130;
-                    var windowHeight = 700;
-                    var windowWidth = 600;
-                    var windowAspectRatio = windowWidth / windowHeight;
-                    var videoAspectRatio = 4 / 3;
-                    var blockAspectRatio;
-                    var tempVideoWidth = 0;
-                    var maxVideoWidth = 0;
+    <script>
+    // Muaz Khan     - https://github.com/muaz-khan
+    // MIT License   - https://www.webrtc-experiment.com/licence/
+    // Documentation - https://github.com/muaz-khan/WebRTC-Experiment/tree/master/video-conferencing
 
-                    for (var i = length; i > 0; i--) {
-                        blockAspectRatio = i * videoAspectRatio / Math.ceil(length / i);
-                        if (blockAspectRatio <= windowAspectRatio) {
-                            tempVideoWidth = videoAspectRatio * windowHeight / Math.ceil(length / i);
-                        } else {
-                            tempVideoWidth = windowWidth / i;
-                        }
-                        if (tempVideoWidth > maxVideoWidth)
-                            maxVideoWidth = tempVideoWidth;
-                    }
-                    for (var i = 0; i < length; i++) {
-                        video = videos[i];
-                        if (video)
-                            video.width = maxVideoWidth - minus;
-                    }
-                }
+    var config = {
+      openSocket: function(config) {
+        var channel = config.channel || location.href.replace( /\/|:|#|%|\.|\[|\]/g , '');
+        var socket = new Firebase('https://webrtc.firebaseIO.com/' + channel);
+        socket.channel = channel;
+        socket.on("child_added", function(data) {
+          config.onmessage && config.onmessage(data.val());
+        });
+        socket.send = function(data) {
+          this.push(data);
+        };
+        config.onopen && setTimeout(config.onopen, 1);
+        socket.onDisconnect().remove();
+        return socket;
+      },
+      onRemoteStream: function(media) {
+        var mediaElement = getMediaElement(media.video, {
+          width: (videosContainer.clientWidth / 2) - 50,
+          buttons: ['mute-audio', 'mute-video', 'full-screen', 'volume-slider']
+        });
+        mediaElement.id = media.streamid;
+        videosContainer.insertBefore(mediaElement, videosContainer.firstChild);
+      },
+      onRemoteStreamEnded: function(stream, video) {
+        if (video.parentNode && video.parentNode.parentNode && video.parentNode.parentNode.parentNode) {
+          video.parentNode.parentNode.parentNode.removeChild(video.parentNode.parentNode);
+        }
+      },
+      onRoomFound: function(room) {
+        var alreadyExist = document.querySelector('button[data-broadcaster="' + room.broadcaster + '"]');
+        if (alreadyExist) return;
 
-                window.onresize = scaleVideos;
+        if (typeof roomsList === 'undefined') roomsList = document.body;
 
-            </script>
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td><strong>' + room.roomName + '</strong> shared a conferencing room with you!</td>' +
+        '<td><button class="join">Join</button></td>';
+        roomsList.insertBefore(tr, roomsList.firstChild);
 
-        </article>
+        var joinRoomButton = tr.querySelector('.join');
+        joinRoomButton.setAttribute('data-broadcaster', room.broadcaster);
+        joinRoomButton.setAttribute('data-roomToken', room.roomToken);
+        joinRoomButton.onclick = function() {
+          this.disabled = true;
 
-        <!-- commits.js is useless for you! -->
-        <!-- <script src="//cdn.webrtc-experiment.com/commits.js" async> </script> -->
-    </body>
+          var broadcaster = this.getAttribute('data-broadcaster');
+          var roomToken = this.getAttribute('data-roomToken');
+          captureUserMedia(function() {
+            conferenceUI.joinRoom({
+              roomToken: roomToken,
+              joinUser: broadcaster
+            });
+          }, function() {
+            joinRoomButton.disabled = false;
+          });
+        };
+      },
+      onRoomClosed: function(room) {
+        var joinButton = document.querySelector('button[data-roomToken="' + room.roomToken + '"]');
+        if (joinButton) {
+          // joinButton.parentNode === <li>
+          // joinButton.parentNode.parentNode === <td>
+          // joinButton.parentNode.parentNode.parentNode === <tr>
+          // joinButton.parentNode.parentNode.parentNode.parentNode === <table>
+          joinButton.parentNode.parentNode.parentNode.parentNode.removeChild(joinButton.parentNode.parentNode.parentNode);
+        }
+      }
+    };
+
+    function setupNewRoomButtonClickHandler() {
+      btnSetupNewRoom.disabled = true;
+      document.getElementById('conference-name').disabled = true;
+      captureUserMedia(function() {
+        conferenceUI.createRoom({
+          roomName: (document.getElementById('conference-name') || { }).value || 'Anonymous'
+        });
+      }, function() {
+        btnSetupNewRoom.disabled = document.getElementById('conference-name').disabled = false;
+      });
+    }
+
+    function captureUserMedia(callback, failure_callback) {
+      var video = document.createElement('video');
+
+      getUserMedia({
+        video: video,
+        onsuccess: function(stream) {
+          config.attachStream = stream;
+          callback && callback();
+
+          video.setAttribute('muted', true);
+
+          var mediaElement = getMediaElement(video, {
+            width: (videosContainer.clientWidth / 2) - 50,
+            buttons: ['mute-audio', 'mute-video', 'full-screen', 'volume-slider']
+          });
+          mediaElement.toggle('mute-audio');
+          videosContainer.insertBefore(mediaElement, videosContainer.firstChild);
+        },
+        onerror: function() {
+          alert('unable to get access to your webcam');
+          callback && callback();
+        }
+      });
+    }
+
+    var conferenceUI = conference(config);
+
+    /* UI specific */
+    var videosContainer = document.getElementById('videos-container') || document.body;
+    var btnSetupNewRoom = document.getElementById('setup-new-room');
+    var roomsList = document.getElementById('rooms-list');
+
+    if (btnSetupNewRoom) btnSetupNewRoom.onclick = setupNewRoomButtonClickHandler;
+
+    function rotateVideo(video) {
+      video.style[navigator.mozGetUserMedia ? 'transform' : '-webkit-transform'] = 'rotate(0deg)';
+      setTimeout(function() {
+        video.style[navigator.mozGetUserMedia ? 'transform' : '-webkit-transform'] = 'rotate(360deg)';
+      }, 1000);
+    }
+
+    (function() {
+      var uniqueToken = document.getElementById('unique-token');
+      if (uniqueToken)
+      if (location.hash.length > 2) uniqueToken.parentNode.parentNode.parentNode.innerHTML = '<h2 style="text-align:center;"><a href="' + location.href + '" target="_blank">Share this link</a></h2>';
+      else uniqueToken.innerHTML = uniqueToken.parentNode.parentNode.href = '#' + (Math.random() * new Date().getTime()).toString(36).toUpperCase().replace( /\./g , '-');
+    })();
+
+    function scaleVideos() {
+      var videos = document.querySelectorAll('video'),
+      length = videos.length, video;
+
+      var minus = 130;
+      var windowHeight = 700;
+      var windowWidth = 600;
+      var windowAspectRatio = windowWidth / windowHeight;
+      var videoAspectRatio = 4 / 3;
+      var blockAspectRatio;
+      var tempVideoWidth = 0;
+      var maxVideoWidth = 0;
+
+      for (var i = length; i > 0; i--) {
+        blockAspectRatio = i * videoAspectRatio / Math.ceil(length / i);
+        if (blockAspectRatio <= windowAspectRatio) {
+          tempVideoWidth = videoAspectRatio * windowHeight / Math.ceil(length / i);
+        } else {
+          tempVideoWidth = windowWidth / i;
+        }
+        if (tempVideoWidth > maxVideoWidth)
+        maxVideoWidth = tempVideoWidth;
+      }
+      for (var i = 0; i < length; i++) {
+        video = videos[i];
+        if (video)
+        video.width = maxVideoWidth - minus;
+      }
+    }
+
+    window.onresize = scaleVideos;
+
+    </script>
+
+  </article>
+  <canvas id="snapcanv" style="width:512;height:256;"></canvas>
+  Camera Z <input id="cameraZ" type="text" name="cameraX" onchange="cameraZ();" value="1000">
+  Rotation X <input id="rotationX" type="text" onchange="rotate();" value="0">
+  Rotation Y <input id="rotationY" type="text" onchange="rotate();" value="0">
+  Rotation Z <input id="rotationZ" type="text" onchange="rotate();" value="0">
+   Euler <input id="euler" type="text" onchange="rotate();" value="ZXY">
+  <div id="webgl"></div>
+
+  <script>
+  document.getElementById('webgl').appendChild(renderer.domElement);
+  render();
+  </script>
+</body>
 </html>
