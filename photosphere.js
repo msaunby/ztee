@@ -3,8 +3,10 @@
 var scene = new THREE.Scene();
 var width  = window.innerWidth, height = window.innerHeight;
 var camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 0);
+camera.position.x = -1000;
 camera.position.y = 0;
-camera.position.z = 1000;
+camera.position.z = 0;
+camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
 //var controls = new THREE.TrackballControls(camera);
 var sphere;
 var globe_vid = {};
