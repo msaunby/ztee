@@ -318,36 +318,19 @@
 
 <script>
 
-var beat_orientation = false;
-
-function heartbeat(){
-  setTimeout( function() {
-    heartbeat();
-    beat_orientation = true;
-  }, 500 );
-}
-
-heartbeat();
-
-  function handleOrientation(event) {
-    if(beat_orientation){
-      beat_orientation = false;
-      if (TogetherJS.running) {
-        TogetherJS.send({
-          type: 'orientation',
-          alpha: event.alpha,
-          beta: event.beta,
-          gamma: event.gamma
-        });
-      }
-      var x = event.beta;  // In degree in the range [-180,180]
-      var y = event.gamma; // In degree in the range [-90,90]
-      var z = event.alpha; // In degree in the range [0,360]
-      $('#x').val(x);
-      $('#y').val(y);
-      $('#z').val(z);
-    }
-  }
+TogetherJS.hub.on('orientation', function (msg) {
+  console.log(msg);
+  //if (!msg.sameUrl) {
+  //  return;
+  //}
+  var x = msg.beta;  // In degree in the range [-180,180]
+  var y = msg.gamma; // In degree in the range [-90,90]
+  var z = msg.alpha; // In degree in the range [0,360]
+  $('#x').val(x);
+  $('#y').val(y);
+  $('#z').val(z);
+  //console.log(msg);
+});
 
   window.addEventListener('deviceorientation', handleOrientation);
 </script>
