@@ -40,17 +40,6 @@
 
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 
-
-  <script type="text/javascript" src="http://threejs.org/build/three.min.js"></script>
-  <script type="text/javascript" src="http://threejs.org/examples/js/controls/TrackballControls.js"></script>
-
-  <script src="http://threejs.org/examples/js/shaders/CopyShader.js"></script>
-  <script src="PaletteShader.js"></script>
-  <script src="http://threejs.org/examples/js/postprocessing/EffectComposer.js"></script>
-  <script src="http://threejs.org/examples/js/postprocessing/RenderPass.js"></script>
-  <script src="http://threejs.org/examples/js/postprocessing/MaskPass.js"></script>
-  <script src="http://threejs.org/examples/js/postprocessing/ShaderPass.js"></script>
-  <script src="photosphere.js"></script>
 </head>
 
 <body>
@@ -74,58 +63,10 @@
 
       <!-- local/remote videos container -->
       <div id="videos-container"></div>
-
-      <div>
-        <button onclick="TogetherJS(this); return false;">Start TogetherJS</button>
-        <button id="snapshot" onclick="getcamera()">Snapshot</button>
-
-      </div>
+      
     </section>
 
-
     <script>
-    function cameraPos(){
-      camera.position.z = Number($("#cameraZ").val());
-      camera.position.x = Number($("#cameraX").val());
-      camera.position.y = Number($("#cameraY").val());
-      camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
-    }
-
-    function rotate(){
-
-        var x = Number($("#rotationX").val()) * Math.PI / 180.0;
-        var y = Number($("#rotationY").val()) * Math.PI / 180.0;
-        var z = Number($("#rotationZ").val()) * Math.PI / 180.0;
-        sphere.rotation.set( x, y, z, $("#euler").val());
-    }
-
-    function getcamera(){
-      var camera = $( "#videos-container" ).find( "video" )[0];
-      //var canvas = $( "#snapcanv" )[0];
-      var canvas = document.createElement('canvas');
-      canvas.width = 960;
-      canvas.height = 480;
-      var ctx = canvas.getContext('2d');
-      var circle_fraction = 10;
-      var aspect = camera.videoWidth / camera.videoHeight;
-      var outwidth = canvas.width / circle_fraction;
-      var outheight = outwidth / aspect;
-      var left_offset = (canvas.width - outwidth) / 2;
-      var top_offset = (canvas.height - outheight) / 2;
-      ctx.fillStyle = "white";
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.drawImage(camera, left_offset,top_offset,outwidth,outheight);
-      loadCanvas( canvas );
-      console.log( camera.videoWidth, camera.videoHeight );
-      //camera.pause();
-    }
-    </script>
-
-
-    <script>
-    // Muaz Khan     - https://github.com/muaz-khan
-    // MIT License   - https://www.webrtc-experiment.com/licence/
-    // Documentation - https://github.com/muaz-khan/WebRTC-Experiment/tree/master/video-conferencing
 
     var config = {
       openSocket: function(config) {
@@ -291,21 +232,6 @@
     </script>
 
   </article>
-  <canvas id="snapcanv" style="width:512;height:256;"></canvas>
-
-  Sensor X <input id="x" type="text" value="">
-  Sensor Y <input id="y" type="text" value="">
-  Sensor Z <input id="z" type="text" value="">
-  <br>
-  Camera Z <input id="cameraZ" type="text" onchange="cameraPos();" value="0">
-  Camera X <input id="cameraX" type="text" onchange="cameraPos();" value="-1000">
-  Camera Y <input id="cameraY" type="text" onchange="cameraPos();" value="0">
-  Rotation X <input id="rotationX" type="text" onchange="rotate();" value="0">
-  Rotation Y <input id="rotationY" type="text" onchange="rotate();" value="0">
-  Rotation Z <input id="rotationZ" type="text" onchange="rotate();" value="0">
-   Euler <input id="euler" type="text" value="ZXY">
-  <div id="webgl"></div>
-
 
   <!-- togetherjs -->
       <script>
@@ -318,31 +244,34 @@
 
 <script>
 
-TogetherJS.hub.on('orientation', function (msg) {
-  console.log(msg);
-  //if (!msg.sameUrl) {
-  //  return;
-  //}
-  var x = msg.beta;  // In degree in the range [-180,180]
-  var y = msg.gamma; // In degree in the range [-90,90]
-  var z = msg.alpha; // In degree in the range [0,360]
-  $('#x').val(x);
-  $('#y').val(y);
-  $('#z').val(z);
+  var beat_orientation = false;
 
-  // remote (phone) sensor Z should control Y rotation of sphere view.
-  //rotateView({x:0, y:msg.alpha, z:0});
-  //sphere.rotation.set( x, y, z, $("#euler").val());
-  $("#rotationY").val(msg.alpha);
-  rotate();
-});
+  function heartbeat(){
+    setTimeout( function() {
+      heartbeat();
+      beat_orientation = true;
+    }, 500 );
+  }
 
-  //window.addEventListener('deviceorientation', handleOrientation);
+  heartbeat();
+
+  function handleOrientation(event) {
+    if(beat_orientation){
+      beat_orientation = false;
+      if (TogetherJS.running) {
+        TogetherJS.send({
+          type: 'orientation',
+          alpha: event.alpha,
+          beta: event.beta,
+          gamma: event.gamma
+        });
+      }
+    }
+  }
+
+  window.addEventListener('deviceorientation', handleOrientation);
+
 </script>
 
-  <script>
-  document.getElementById('webgl').appendChild(renderer.domElement);
-  render();
-  </script>
 </body>
 </html>
