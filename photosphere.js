@@ -9,6 +9,8 @@ camera.position.z = 0;
 camera.lookAt(new THREE.Vector3( 0, 0, 0 ));
 //var controls = new THREE.TrackballControls(camera);
 var sphere;
+
+var vidSphere;
 var globe_vid = {};
 
 var ambientLight = new THREE.AmbientLight( 0xffffff );
@@ -33,8 +35,19 @@ renderer.render(scene, camera);
 }
 
 var basicMaterial;
-var geometry = new THREE.SphereGeometry( 500, 100, 100 );
+var vidMaterial;
 
+
+// See http://threejs.org/docs/#Reference/Extras.Geometries/SphereGeometry
+
+var south = -0.4 * Math.PI;
+var snLen = -0.2 * Math.PI;
+var east = -0.1 * Math.PI;
+var ewLen = 0.2 * Math.PI;
+
+var vidGeometry = new THREE.SphereGeometry( 490, 100, 100, east, ewLen, south, snLen);
+
+var geometry = new THREE.SphereGeometry( 500, 100, 100, east, ewLen, south, snLen);
 
 function loadImage( url, cb ){
   var tmpImage = new Image();
@@ -104,6 +117,20 @@ loadCanvas = function( canvas ){
   scene.add( sphere );
 }
 
+loadVideo = function( video ){
+  globe_vid.video = video;
+  globe_vid.texture = new THREE.VideoTexture( globe_vid.video );
+  globe_vid.texture.offset.x = 0.0;
+  globe_vid.texture.offset.y =  0.0;
+  globe_vid.texture.repeat.x = 1.0;
+  globe_vid.texture.repeat.y= 1.0;
+  globe_vid.texture.minFilter = THREE.NearestFilter;
+  globe_vid.texture.magFilter = THREE.NearestFilter;
+  globe_vid.texture.format = THREE.RGBFormat;
+  vidMaterial.map = globe_vid.texture;
+  scene.add( vidSphere );
+}
+
 /*
 loadVideo( 'videos/co2.webm',
 function(video){
@@ -122,8 +149,10 @@ scene.add( sphere );
 */
 
 basicMaterial = new THREE.MeshBasicMaterial( { overdraw: 1.0, side: THREE.BackSide } );
+vidMaterial = new THREE.MeshBasicMaterial( { overdraw: 1.0, side: THREE.BackSide } );
 
 sphere = new THREE.Mesh(	geometry, basicMaterial );
+vidSphere = new THREE.Mesh(	vidGeometry, vidMaterial );
 
 var composer = new THREE.EffectComposer( renderer );
 var input = new THREE.RenderPass( scene, camera );

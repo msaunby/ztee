@@ -18,7 +18,7 @@
     transition: all 1s ease;
     vertical-align: top;
   }
- </style>
+  </style>
 
   <script>
   document.createElement('article');
@@ -228,17 +228,20 @@
     </script>
 
   </article>
-
+  
   <!-- togetherjs -->
-      <script>
-        TogetherJSConfig_findRoom = {prefix: "ztee", max: 30};
-        TogetherJSConfig_autoStart = true;
-        TogetherJSConfig_suppressJoinConfirmation = true;
-        TogetherJSConfig_storagePrefix = "tjs_ztee";
-      </script>
+  <script>
+  TogetherJSConfig_findRoom = {prefix: "ztee", max: 30};
+  TogetherJSConfig_autoStart = true;
+  TogetherJSConfig_suppressJoinConfirmation = true;
+  TogetherJSConfig_storagePrefix = "tjs_ztee";
+  TogetherJSConfig_suppressInvite = true;
+  TogetherJSConfig_dontShowClicks = true;
+  </script>
+
   <script src="https://togetherjs.com/togetherjs-min.js"></script>
 
-<script>
+  <script>
 
   var beat_orientation = false;
 
@@ -267,7 +270,7 @@
 
   window.addEventListener('deviceorientation', handleOrientation);
 
-</script>
+  </script>
 
 </body>
 </html>

@@ -99,9 +99,35 @@
         sphere.rotation.set( x, y, z, $("#euler").val());
     }
 
-    function getcamera(){
+    var remote = {}; // current orientation of remote
+    var snap = {}; // orientation when snapshot taken
+
+    function getvideo(){
       var camera = $( "#videos-container" ).find( "video" )[0];
-      //var canvas = $( "#snapcanv" )[0];
+      loadVideo(camera);
+      console.log( camera.videoWidth, camera.videoHeight );
+    }
+
+    function getcamera(){
+      getvideo();
+      var camera = $( "#videos-container" ).find( "video" )[0];
+      var canvas = document.createElement('canvas');
+      canvas.width = camera.videoWidth;
+      canvas.height = camera.videoHeight;
+      var ctx = canvas.getContext('2d');
+      // save camera orientation.
+      snap.alpha = remote.alpha;
+      snap.beta = remote.beta;
+      snap.gamma = remote.gamma;
+
+      ctx.drawImage(camera, 0, 0, canvas.width, canvas.height);
+      loadCanvas( canvas );
+      console.log( camera.videoWidth, camera.videoHeight );
+    }
+
+    function getcameraX(){
+      getvideo();
+      var camera = $( "#videos-container" ).find( "video" )[0];
       var canvas = document.createElement('canvas');
       canvas.width = 960;
       canvas.height = 480;
@@ -112,20 +138,23 @@
       var outheight = outwidth / aspect;
       var left_offset = (canvas.width - outwidth) / 2;
       var top_offset = (canvas.height - outheight) / 2;
-      ctx.fillStyle = "white";
+      ctx.fillStyle = "rgba(0,0,0,0)";
       ctx.fillRect(0,0,canvas.width,canvas.height);
+
+      // save camera orientation.
+
+      snap.alpha = remote.alpha;
+      snap.beta = remote.beta;
+      snap.gamma = remote.gamma;
+
       ctx.drawImage(camera, left_offset,top_offset,outwidth,outheight);
       loadCanvas( canvas );
       console.log( camera.videoWidth, camera.videoHeight );
-      //camera.pause();
     }
     </script>
 
 
     <script>
-    // Muaz Khan     - https://github.com/muaz-khan
-    // MIT License   - https://www.webrtc-experiment.com/licence/
-    // Documentation - https://github.com/muaz-khan/WebRTC-Experiment/tree/master/video-conferencing
 
     var config = {
       openSocket: function(config) {
@@ -314,6 +343,8 @@
         TogetherJSConfig_autoStart = true;
         TogetherJSConfig_suppressJoinConfirmation = true;
         TogetherJSConfig_storagePrefix = "tjs_ztee";
+        TogetherJSConfig_suppressInvite = true;
+        TogetherJSConfig_dontShowClicks = true;
       </script>
   <script src="https://togetherjs.com/togetherjs-min.js"></script>
 
@@ -330,7 +361,9 @@ TogetherJS.hub.on('orientation', function (msg) {
   $('#x').val(x);
   $('#y').val(y);
   $('#z').val(z);
-
+  remote.alpha = msg.alpha;
+  remote.beta = msg.beta;
+  remote.gamma = msg.gamma;
   // remote (phone) sensor Z should control Y rotation of sphere view.
   //rotateView({x:0, y:msg.alpha, z:0});
   //sphere.rotation.set( x, y, z, $("#euler").val());
