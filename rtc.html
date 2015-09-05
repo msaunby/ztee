@@ -93,9 +93,16 @@
 
     function rotate(){
 
-        var x = Number($("#rotationX").val()) * Math.PI / 180.0;
-        var y = Number($("#rotationY").val()) * Math.PI / 180.0;
-        var z = Number($("#rotationZ").val()) * Math.PI / 180.0;
+        var x = 0; //Number($("#gamma").val()) * Math.PI / 180.0;
+        var y = Number($("#alpha").val()) + 360;
+        var z = Number($("#beta").val());
+        y = Number($("#rotationY").val()) + y - snap.alpha;
+        z = Number($("#rotationZ").val()) + z - snap.beta;
+
+        console.warn("ROTATION", [x, y, z]);
+
+        y = y * Math.PI / 180.0;
+        z = z * Math.PI / 180.0;
         sphere.rotation.set( x, y, z, $("#euler").val());
     }
 
@@ -323,9 +330,9 @@
   </article>
   <canvas id="snapcanv" style="width:512;height:256;"></canvas>
 
-  Sensor X <input id="x" type="text" value="">
-  Sensor Y <input id="y" type="text" value="">
-  Sensor Z <input id="z" type="text" value="">
+  Sensor Beta <input id="beta" type="text" value="">
+  Sensor Gamma <input id="gamma" type="text" value="">
+  Sensor Alpha <input id="alpha" type="text" value="">
   <br>
   Camera Z <input id="cameraZ" type="text" onchange="cameraPos();" value="0">
   Camera X <input id="cameraX" type="text" onchange="cameraPos();" value="-1000">
@@ -355,19 +362,19 @@ TogetherJS.hub.on('orientation', function (msg) {
   //if (!msg.sameUrl) {
   //  return;
   //}
-  var x = msg.beta;  // In degree in the range [-180,180]
-  var y = msg.gamma; // In degree in the range [-90,90]
-  var z = msg.alpha; // In degree in the range [0,360]
-  $('#x').val(x);
-  $('#y').val(y);
-  $('#z').val(z);
-  remote.alpha = msg.alpha;
-  remote.beta = msg.beta;
-  remote.gamma = msg.gamma;
+  remote.alpha = msg.alpha; // In degree in the range [0,360]
+  remote.beta = msg.beta; // In degree in the range [-180,180]
+  remote.gamma = msg.gamma; // In degree in the range [-90,90]
+
+  $("#beta").val(remote.beta);
+  $("#gamma").val(remote.gamma);
+  $("#alpha").val(remote.alpha);
+
   // remote (phone) sensor Z should control Y rotation of sphere view.
   //rotateView({x:0, y:msg.alpha, z:0});
   //sphere.rotation.set( x, y, z, $("#euler").val());
-  $("#rotationY").val(msg.alpha);
+  //$("#rotationY").val(msg.alpha);
+  //$("#rotationZ").val(msg.beta);
   rotate();
 });
 
