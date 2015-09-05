@@ -94,9 +94,9 @@
     function rotate(){
 
         var x = 0; //Number($("#gamma").val()) * Math.PI / 180.0;
-        var y = Number($("#alpha").val()) + 360;
+        var y = Number($("#alpha").val()) + 720; // ensures +ve after modulus.
         var z = Number($("#beta").val());
-        y = Number($("#rotationY").val()) + y - snap.alpha;
+        y = (Number($("#rotationY").val()) + y - snap.alpha) % 360;
         z = Number($("#rotationZ").val()) + z - snap.beta;
 
         console.warn("ROTATION", [x, y, z]);
