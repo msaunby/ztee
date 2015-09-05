@@ -94,9 +94,9 @@
     function rotate(){
 
         var x = 0; //Number($("#gamma").val()) * Math.PI / 180.0;
-        var y = Number($("#alpha").val()) + 720; // ensures +ve after modulus.
+        var y = 720.0  - Number($("#alpha").val()); // ensures +ve after modulus.
         var z = Number($("#beta").val());
-        y = (Number($("#rotationY").val()) + y - snap.alpha) % 360;
+        y = (Number($("#rotationY").val()) + y + snap.alpha) % 360;
         z = Number($("#rotationZ").val()) + z - snap.beta;
 
         console.warn("ROTATION", [x, y, z]);
@@ -109,15 +109,20 @@
     var remote = {}; // current orientation of remote
     var snap = {}; // orientation when snapshot taken
 
+/*
     function getvideo(){
       var camera = $( "#videos-container" ).find( "video" )[0];
-      loadVideo(camera);
+      var cameraWFrac = Number($('#cameraW').val());
+      var cameraHFrac = Number($('#cameraH').val());
+      loadVideo(camera, cameraWFrac, cameraHFrac);
       console.log( camera.videoWidth, camera.videoHeight );
     }
+*/
 
     function getcamera(){
-      getvideo();
       var camera = $( "#videos-container" ).find( "video" )[0];
+      var cameraWFrac = Number($('#cameraW').val());
+      var cameraHFrac = Number($('#cameraH').val());
       var canvas = document.createElement('canvas');
       canvas.width = camera.videoWidth;
       canvas.height = camera.videoHeight;
@@ -126,36 +131,11 @@
       snap.alpha = remote.alpha;
       snap.beta = remote.beta;
       snap.gamma = remote.gamma;
-
       ctx.drawImage(camera, 0, 0, canvas.width, canvas.height);
-      loadCanvas( canvas );
-      console.log( camera.videoWidth, camera.videoHeight );
-    }
+      loadCanvas( canvas, cameraWFrac, cameraHFrac);
 
-    function getcameraX(){
-      getvideo();
-      var camera = $( "#videos-container" ).find( "video" )[0];
-      var canvas = document.createElement('canvas');
-      canvas.width = 960;
-      canvas.height = 480;
-      var ctx = canvas.getContext('2d');
-      var circle_fraction = 10;
-      var aspect = camera.videoWidth / camera.videoHeight;
-      var outwidth = canvas.width / circle_fraction;
-      var outheight = outwidth / aspect;
-      var left_offset = (canvas.width - outwidth) / 2;
-      var top_offset = (canvas.height - outheight) / 2;
-      ctx.fillStyle = "rgba(0,0,0,0)";
-      ctx.fillRect(0,0,canvas.width,canvas.height);
+      loadVideo(camera, cameraWFrac, cameraHFrac);
 
-      // save camera orientation.
-
-      snap.alpha = remote.alpha;
-      snap.beta = remote.beta;
-      snap.gamma = remote.gamma;
-
-      ctx.drawImage(camera, left_offset,top_offset,outwidth,outheight);
-      loadCanvas( canvas );
       console.log( camera.videoWidth, camera.videoHeight );
     }
     </script>
@@ -328,8 +308,12 @@
     </script>
 
   </article>
+  <!--
   <canvas id="snapcanv" style="width:512;height:256;"></canvas>
-
+-->
+  Camera width fraction <input id="cameraW" type="text" value="0.3">
+  Camera height fraction <input id="cameraH" type="text" value="0.25">
+  <br>
   Sensor Beta <input id="beta" type="text" value="">
   Sensor Gamma <input id="gamma" type="text" value="">
   Sensor Alpha <input id="alpha" type="text" value="">
