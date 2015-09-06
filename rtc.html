@@ -32,7 +32,11 @@
 
   <!-- scripts used for video-conferencing -->
   <script src="//cdn.webrtc-experiment.com/firebase.js"> </script>
-  <script src="//cdn.webrtc-experiment.com/RTCPeerConnection-v1.5.js"> </script>
+  <script src="RTCPeerConnection-v1.5.js"> </script>
+  <script>
+  video_constraints.mandatory.maxWidth = 320
+  video_constraints.mandatory.maxHeight = 320
+  </script>
   <script src="conference.js"> </script>
 
   <!-- script used to stylize video element -->
