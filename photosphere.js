@@ -56,6 +56,7 @@ loadCanvas = function( canvas, widthFraction, heightFraction ){
   var geometry = new THREE.SphereGeometry( 500, 100, 100, east, ewLen, south, snLen);
   sphere = new THREE.Mesh(	geometry, basicMaterial );
   scene.add( sphere );
+  return sphere;
 }
 
 loadVideo = function( video, widthFraction, heightFraction ){
@@ -77,6 +78,7 @@ loadVideo = function( video, widthFraction, heightFraction ){
   var vidGeometry = new THREE.SphereGeometry( 490, 100, 100, east, ewLen, south, snLen);
   vidSphere = new THREE.Mesh(	vidGeometry, vidMaterial );
   scene.add( vidSphere );
+  return vidSphere;
 }
 
 

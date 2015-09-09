@@ -32,10 +32,15 @@
 
   <!-- scripts used for video-conferencing -->
   <script src="//cdn.webrtc-experiment.com/firebase.js"> </script>
+  <script src="adapter.js"></script>
   <script src="RTCPeerConnection-v1.5.js"> </script>
   <script>
-  video_constraints.mandatory.maxWidth = 320
-  video_constraints.mandatory.maxHeight = 320
+    //video_constraints.width = {max:320};
+    //video_constraints.height = {max:320};
+    //video_constraints.facingMode = {exact: "user"};
+    // Old style - for Chrome.
+    video_constraints.mandatory.maxWidth = 320;
+    video_constraints.mandatory.maxHeight = 320;
   </script>
   <script src="conference.js"> </script>
 
@@ -97,6 +102,7 @@
 
     function rotate(){
 
+        var snap = snaps[0];
         var x = 0; //Number($("#gamma").val()) * Math.PI / 180.0;
         var y = 720.0  - Number($("#alpha").val()); // ensures +ve after modulus.
         var z = Number($("#beta").val());
@@ -107,11 +113,13 @@
 
         y = y * Math.PI / 180.0;
         z = z * Math.PI / 180.0;
-        sphere.rotation.set( x, y, z, $("#euler").val());
+        snap.sphere.rotation.set( x, y, z, $("#euler").val());
     }
 
     var remote = {}; // current orientation of remote
-    var snap = {}; // orientation when snapshot taken
+    var snaps = []; // orientation when snapshot taken
+    var snap_no = 0;
+    var snap_max = 12;
 
 /*
     function getvideo(){
@@ -132,13 +140,18 @@
       canvas.height = camera.videoHeight;
       var ctx = canvas.getContext('2d');
       // save camera orientation.
+      var snap = {};
       snap.alpha = remote.alpha;
       snap.beta = remote.beta;
       snap.gamma = remote.gamma;
       ctx.drawImage(camera, 0, 0, canvas.width, canvas.height);
-      loadCanvas( canvas, cameraWFrac, cameraHFrac);
+      snap.sphere = loadCanvas( canvas, cameraWFrac, cameraHFrac);
 
       loadVideo(camera, cameraWFrac, cameraHFrac);
+
+      snap_no = snap_no % snap_max;
+      snaps[snap_no] = snap;
+      snap_no++;
 
       console.log( camera.videoWidth, camera.videoHeight );
     }
