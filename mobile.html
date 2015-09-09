@@ -29,8 +29,9 @@
   <script src="//cdn.webrtc-experiment.com/firebase.js"> </script>
   <script src="RTCPeerConnection-v1.5.js"> </script>
   <script>
-  video_constraints.mandatory.maxWidth = 320
-  video_constraints.mandatory.maxHeight = 320
+  video_constraints.width = {max:320};
+  video_constraints.height = {max:320};
+  video_constraints.facingMode = {exact: "user"};
   </script>
   <script src="conference.js"> </script>
 
