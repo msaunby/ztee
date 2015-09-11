@@ -43,17 +43,18 @@ renderer.render(scene, camera);
 //var widthFraction = 0.2;
 
 
-loadCanvas = function( canvas, widthFraction, heightFraction ){
-  wmsTexture = new THREE.ImageUtils.loadTexture(canvas.toDataURL());
-  wmsTexture.needsUpdate = true;
+loadCanvas = function( canvas, layernum, widthFraction, heightFraction ){
+  var texture = new THREE.ImageUtils.loadTexture(canvas.toDataURL());
+  texture.needsUpdate = true;
+  texture.minFilter = THREE.NearestFilter;
 
   var basicMaterial = new THREE.MeshBasicMaterial( { overdraw: 1.0, side: THREE.BackSide } );
-  basicMaterial.map = wmsTexture;
+  basicMaterial.map = texture;
   var south = (-0.5 + heightFraction/2.0) * Math.PI;
   var snLen = -heightFraction * Math.PI;
   var east = (0.0 - widthFraction/2.0) * Math.PI;
   var ewLen = widthFraction * Math.PI;
-  var geometry = new THREE.SphereGeometry( 500, 100, 100, east, ewLen, south, snLen);
+  var geometry = new THREE.SphereGeometry( 500 + layernum, 100, 100, east, ewLen, south, snLen);
   sphere = new THREE.Mesh(	geometry, basicMaterial );
   scene.add( sphere );
   return sphere;
@@ -75,7 +76,7 @@ loadVideo = function( video, widthFraction, heightFraction ){
   var snLen = -heightFraction * Math.PI;
   var east = (0.0 - widthFraction/2.0) * Math.PI;
   var ewLen = widthFraction * Math.PI;
-  var vidGeometry = new THREE.SphereGeometry( 490, 100, 100, east, ewLen, south, snLen);
+  var vidGeometry = new THREE.SphereGeometry( 499, 100, 100, east, ewLen, south, snLen);
   vidSphere = new THREE.Mesh(	vidGeometry, vidMaterial );
   scene.add( vidSphere );
   return vidSphere;

@@ -11,7 +11,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
-  <link rel="stylesheet" href="//cdn.webrtc-experiment.com/style.css">
+  <link rel="stylesheet" href="style.css">
 
   <style>
   audio, video {
@@ -23,7 +23,7 @@
     transition: all 1s ease;
     vertical-align: top;
   }
- </style>
+  </style>
 
   <script>
   document.createElement('article');
@@ -31,21 +31,21 @@
   </script>
 
   <!-- scripts used for video-conferencing -->
-  <script src="//cdn.webrtc-experiment.com/firebase.js"> </script>
+  <script src="firebase.js"> </script>
   <script src="adapter.js"></script>
   <script src="RTCPeerConnection-v1.5.js"> </script>
   <script>
-    //video_constraints.width = {max:320};
-    //video_constraints.height = {max:320};
-    //video_constraints.facingMode = {exact: "user"};
-    // Old style - for Chrome.
-    video_constraints.mandatory.maxWidth = 320;
-    video_constraints.mandatory.maxHeight = 320;
+  //video_constraints.width = {max:320};
+  //video_constraints.height = {max:320};
+  //video_constraints.facingMode = {exact: "user"};
+  // Old style - for Chrome.
+  video_constraints.mandatory.maxWidth = 320;
+  video_constraints.mandatory.maxHeight = 320;
   </script>
   <script src="conference.js"> </script>
 
   <!-- script used to stylize video element -->
-  <script src="//cdn.webrtc-experiment.com/getMediaElement.min.js"> </script>
+  <script src="getMediaElement.min.js"> </script>
 
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 
@@ -86,7 +86,7 @@
 
       <div>
         <button onclick="TogetherJS(this); return false;">Start TogetherJS</button>
-        <button id="snapshot" onclick="getcamera()">Snapshot</button>
+        <button id="snapshot" onclick="startSphere()">Sphere view</button>
 
       </div>
     </section>
@@ -102,18 +102,18 @@
 
     function rotate(){
 
-        var snap = snaps[0];
-        var x = 0; //Number($("#gamma").val()) * Math.PI / 180.0;
-        var y = 720.0  - Number($("#alpha").val()); // ensures +ve after modulus.
-        var z = Number($("#beta").val());
-        y = (Number($("#rotationY").val()) + y + snap.alpha) % 360;
-        z = Number($("#rotationZ").val()) + z - snap.beta;
+      var snap = snaps[0];
+      var x = 0; //Number($("#gamma").val()) * Math.PI / 180.0;
+      var y = 720.0  + Number($("#alpha").val()); // ensures +ve after modulus.
+      var z = Number($("#beta").val());
+      y = (Number($("#rotationY").val()) + y - snap.alpha) % 360;
+      z = Number($("#rotationZ").val()) + z - snap.beta;
 
-        console.warn("ROTATION", [x, y, z]);
+      console.warn("ROTATION", [x, y, z]);
 
-        y = y * Math.PI / 180.0;
-        z = z * Math.PI / 180.0;
-        snap.sphere.rotation.set( x, y, z, $("#euler").val());
+      y = y * Math.PI / 180.0;
+      z = z * Math.PI / 180.0;
+      snap.sphere.rotation.set( x, y, z, $("#euler").val());
     }
 
     var remote = {}; // current orientation of remote
@@ -121,240 +121,282 @@
     var snap_no = 0;
     var snap_max = 12;
 
-/*
+    /*
     function getvideo(){
-      var camera = $( "#videos-container" ).find( "video" )[0];
-      var cameraWFrac = Number($('#cameraW').val());
-      var cameraHFrac = Number($('#cameraH').val());
-      loadVideo(camera, cameraWFrac, cameraHFrac);
-      console.log( camera.videoWidth, camera.videoHeight );
+    var camera = $( "#videos-container" ).find( "video" )[0];
+    var cameraWFrac = Number($('#cameraW').val());
+    var cameraHFrac = Number($('#cameraH').val());
+    loadVideo(camera, cameraWFrac, cameraHFrac);
+    console.log( camera.videoWidth, camera.videoHeight );
+  }
+  */
+
+  var mediaCamera, cameraWFrac, cameraHFrac;
+
+  function startSphere()
+  {
+    cameraWFrac = Number($('#cameraW').val());
+    cameraHFrac = Number($('#cameraH').val());
+    mediaCamera = $( "#videos-container" ).find( "video" )[0];
+
+    /*
+    for(snap_no=0; snap_no<snap_max; snap_no++){
+      createCanv( snap_no );
     }
-*/
+    */
+    heartbeat();
+    console.log( mediaCamera.videoWidth, mediaCamera.videoHeight );
 
-    function getcamera(){
-      var camera = $( "#videos-container" ).find( "video" )[0];
-      var cameraWFrac = Number($('#cameraW').val());
-      var cameraHFrac = Number($('#cameraH').val());
-      var canvas = document.createElement('canvas');
-      canvas.width = camera.videoWidth;
-      canvas.height = camera.videoHeight;
-      var ctx = canvas.getContext('2d');
-      // save camera orientation.
-      var snap = {};
-      snap.alpha = remote.alpha;
-      snap.beta = remote.beta;
-      snap.gamma = remote.gamma;
-      ctx.drawImage(camera, 0, 0, canvas.width, canvas.height);
-      snap.sphere = loadCanvas( canvas, cameraWFrac, cameraHFrac);
+  }
 
-      loadVideo(camera, cameraWFrac, cameraHFrac);
 
-      snap_no = snap_no % snap_max;
-      snaps[snap_no] = snap;
+  function heartbeat(){
+    if(snap_no < snap_max){
+      createCanv( snap_no );
       snap_no++;
-
-      console.log( camera.videoWidth, camera.videoHeight );
+      setTimeout( function() {
+        heartbeat();
+      }, 500 );
+    }else{
+      loadVideo(mediaCamera, cameraWFrac, cameraHFrac);
     }
-    </script>
+  }
+
+function createCanv(n){
+  console.warn('*** createCanv', n);
+  var canvas = document.createElement('canvas');
+  canvas.width = mediaCamera.videoWidth;
+  canvas.height = mediaCamera.videoHeight;
+  var ctx = canvas.getContext('2d');
+  ctx.drawImage(mediaCamera, 0, 0, canvas.width, canvas.height);
+  // save camera orientation.
+  var snap = {};
+  snap.alpha = remote.alpha;
+  snap.beta = remote.beta;
+  snap.gamma = remote.gamma;
+  snap.sphere = loadCanvas( canvas, n, cameraWFrac, cameraHFrac);
+  snaps[n] = snap;
+}
+
+  function getcamera(){
+    /*
+    var camera = $( "#videos-container" ).find( "video" )[0];
+    var canvas = document.createElement('canvas');
+    canvas.width = camera.videoWidth;
+    canvas.height = camera.videoHeight;
+    var ctx = canvas.getContext('2d');
+    // save camera orientation.
+    var snap = {};
+    snap.alpha = remote.alpha;
+    snap.beta = remote.beta;
+    snap.gamma = remote.gamma;
+    ctx.drawImage(camera, 0, 0, canvas.width, canvas.height);
+    snap.sphere = loadCanvas( canvas, snap_no, cameraWFrac, cameraHFrac);
+    snaps[snap_no] = snap;
+    snap_no++;
+    snap_no = snap_no % snap_max;
+    */
+  }
+  </script>
 
 
-    <script>
+  <script>
 
-    var config = {
-      openSocket: function(config) {
-        var channel = config.channel; // || location.href.replace( /\/|:|#|%|\.|\[|\]/g , '');
-        var socket = new Firebase('https://webrtc.firebaseIO.com/' + channel);
-        socket.channel = channel;
-        socket.on("child_added", function(data) {
-          config.onmessage && config.onmessage(data.val());
+  var config = {
+    openSocket: function(config) {
+      var channel = config.channel; // || location.href.replace( /\/|:|#|%|\.|\[|\]/g , '');
+      var socket = new Firebase('https://webrtc.firebaseIO.com/' + channel);
+      socket.channel = channel;
+      socket.on("child_added", function(data) {
+        config.onmessage && config.onmessage(data.val());
+      });
+      socket.send = function(data) {
+        this.push(data);
+      };
+      config.onopen && setTimeout(config.onopen, 1);
+      socket.onDisconnect().remove();
+      return socket;
+    },
+    onRemoteStream: function(media) {
+      var mediaElement = getMediaElement(media.video, {
+        width: (videosContainer.clientWidth / 2) - 50,
+        buttons: ['mute-audio', 'mute-video', 'full-screen', 'volume-slider']
+      });
+      mediaElement.id = media.streamid;
+      videosContainer.insertBefore(mediaElement, videosContainer.firstChild);
+    },
+    onRemoteStreamEnded: function(stream, video) {
+      if (video.parentNode && video.parentNode.parentNode && video.parentNode.parentNode.parentNode) {
+        video.parentNode.parentNode.parentNode.removeChild(video.parentNode.parentNode);
+      }
+    },
+    onRoomFound: function(room) {
+      var alreadyExist = document.querySelector('button[data-broadcaster="' + room.broadcaster + '"]');
+      if (alreadyExist) return;
+
+      if (typeof roomsList === 'undefined') roomsList = document.body;
+
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><strong>' + room.roomName + '</strong> shared a conferencing room with you!</td>' +
+      '<td><button class="join">Join</button></td>';
+      roomsList.insertBefore(tr, roomsList.firstChild);
+
+      var joinRoomButton = tr.querySelector('.join');
+      joinRoomButton.setAttribute('data-broadcaster', room.broadcaster);
+      joinRoomButton.setAttribute('data-roomToken', room.roomToken);
+      joinRoomButton.onclick = function() {
+        this.disabled = true;
+
+        var broadcaster = this.getAttribute('data-broadcaster');
+        var roomToken = this.getAttribute('data-roomToken');
+        captureUserMedia(function() {
+          conferenceUI.joinRoom({
+            roomToken: roomToken,
+            joinUser: broadcaster
+          });
+        }, function() {
+          joinRoomButton.disabled = false;
         });
-        socket.send = function(data) {
-          this.push(data);
-        };
-        config.onopen && setTimeout(config.onopen, 1);
-        socket.onDisconnect().remove();
-        return socket;
-      },
-      onRemoteStream: function(media) {
-        var mediaElement = getMediaElement(media.video, {
+      };
+    },
+    onRoomClosed: function(room) {
+      var joinButton = document.querySelector('button[data-roomToken="' + room.roomToken + '"]');
+      if (joinButton) {
+        // joinButton.parentNode === <li>
+        // joinButton.parentNode.parentNode === <td>
+        // joinButton.parentNode.parentNode.parentNode === <tr>
+        // joinButton.parentNode.parentNode.parentNode.parentNode === <table>
+        joinButton.parentNode.parentNode.parentNode.parentNode.removeChild(joinButton.parentNode.parentNode.parentNode);
+      }
+    }
+  };
+
+  function setupNewRoomButtonClickHandler() {
+    btnSetupNewRoom.disabled = true;
+    document.getElementById('conference-name').disabled = true;
+    captureUserMedia(function() {
+      conferenceUI.createRoom({
+        roomName: (document.getElementById('conference-name') || { }).value || 'Anonymous'
+      });
+    }, function() {
+      btnSetupNewRoom.disabled = document.getElementById('conference-name').disabled = false;
+    });
+  }
+
+  function captureUserMedia(callback, failure_callback) {
+    var video = document.createElement('video');
+
+    getUserMedia({
+      video: video,
+      onsuccess: function(stream) {
+        config.attachStream = stream;
+        callback && callback();
+
+        video.setAttribute('muted', true);
+
+        var mediaElement = getMediaElement(video, {
           width: (videosContainer.clientWidth / 2) - 50,
           buttons: ['mute-audio', 'mute-video', 'full-screen', 'volume-slider']
         });
-        mediaElement.id = media.streamid;
+        mediaElement.toggle('mute-audio');
         videosContainer.insertBefore(mediaElement, videosContainer.firstChild);
       },
-      onRemoteStreamEnded: function(stream, video) {
-        if (video.parentNode && video.parentNode.parentNode && video.parentNode.parentNode.parentNode) {
-          video.parentNode.parentNode.parentNode.removeChild(video.parentNode.parentNode);
-        }
-      },
-      onRoomFound: function(room) {
-        var alreadyExist = document.querySelector('button[data-broadcaster="' + room.broadcaster + '"]');
-        if (alreadyExist) return;
-
-        if (typeof roomsList === 'undefined') roomsList = document.body;
-
-        var tr = document.createElement('tr');
-        tr.innerHTML = '<td><strong>' + room.roomName + '</strong> shared a conferencing room with you!</td>' +
-        '<td><button class="join">Join</button></td>';
-        roomsList.insertBefore(tr, roomsList.firstChild);
-
-        var joinRoomButton = tr.querySelector('.join');
-        joinRoomButton.setAttribute('data-broadcaster', room.broadcaster);
-        joinRoomButton.setAttribute('data-roomToken', room.roomToken);
-        joinRoomButton.onclick = function() {
-          this.disabled = true;
-
-          var broadcaster = this.getAttribute('data-broadcaster');
-          var roomToken = this.getAttribute('data-roomToken');
-          captureUserMedia(function() {
-            conferenceUI.joinRoom({
-              roomToken: roomToken,
-              joinUser: broadcaster
-            });
-          }, function() {
-            joinRoomButton.disabled = false;
-          });
-        };
-      },
-      onRoomClosed: function(room) {
-        var joinButton = document.querySelector('button[data-roomToken="' + room.roomToken + '"]');
-        if (joinButton) {
-          // joinButton.parentNode === <li>
-          // joinButton.parentNode.parentNode === <td>
-          // joinButton.parentNode.parentNode.parentNode === <tr>
-          // joinButton.parentNode.parentNode.parentNode.parentNode === <table>
-          joinButton.parentNode.parentNode.parentNode.parentNode.removeChild(joinButton.parentNode.parentNode.parentNode);
-        }
+      onerror: function() {
+        alert('unable to get access to your webcam');
+        callback && callback();
       }
-    };
+    });
+  }
 
-    function setupNewRoomButtonClickHandler() {
-      btnSetupNewRoom.disabled = true;
-      document.getElementById('conference-name').disabled = true;
-      captureUserMedia(function() {
-        conferenceUI.createRoom({
-          roomName: (document.getElementById('conference-name') || { }).value || 'Anonymous'
-        });
-      }, function() {
-        btnSetupNewRoom.disabled = document.getElementById('conference-name').disabled = false;
-      });
-    }
+  config.channel = "wetoffice.com/ztee";
+  var conferenceUI = conference(config);
 
-    function captureUserMedia(callback, failure_callback) {
-      var video = document.createElement('video');
+  /* UI specific */
+  var videosContainer = document.getElementById('videos-container') || document.body;
+  var btnSetupNewRoom = document.getElementById('setup-new-room');
+  var roomsList = document.getElementById('rooms-list');
 
-      getUserMedia({
-        video: video,
-        onsuccess: function(stream) {
-          config.attachStream = stream;
-          callback && callback();
+  if (btnSetupNewRoom) btnSetupNewRoom.onclick = setupNewRoomButtonClickHandler;
 
-          video.setAttribute('muted', true);
+  function rotateVideo(video) {
+    video.style[navigator.mozGetUserMedia ? 'transform' : '-webkit-transform'] = 'rotate(0deg)';
+    setTimeout(function() {
+      video.style[navigator.mozGetUserMedia ? 'transform' : '-webkit-transform'] = 'rotate(360deg)';
+    }, 1000);
+  }
 
-          var mediaElement = getMediaElement(video, {
-            width: (videosContainer.clientWidth / 2) - 50,
-            buttons: ['mute-audio', 'mute-video', 'full-screen', 'volume-slider']
-          });
-          mediaElement.toggle('mute-audio');
-          videosContainer.insertBefore(mediaElement, videosContainer.firstChild);
-        },
-        onerror: function() {
-          alert('unable to get access to your webcam');
-          callback && callback();
-        }
-      });
-    }
+  (function() {
+    var uniqueToken = document.getElementById('unique-token');
+    if (uniqueToken)
+    if (location.hash.length > 2) uniqueToken.parentNode.parentNode.parentNode.innerHTML = '<h2 style="text-align:center;"><a href="' + location.href + '" target="_blank">Share this link</a></h2>';
+    else uniqueToken.innerHTML = uniqueToken.parentNode.parentNode.href = '#' + (Math.random() * new Date().getTime()).toString(36).toUpperCase().replace( /\./g , '-');
+  })();
 
-    config.channel = "wetoffice.com/ztee";
-    var conferenceUI = conference(config);
+  function scaleVideos() {
+    var videos = document.querySelectorAll('video'),
+    length = videos.length, video;
 
-    /* UI specific */
-    var videosContainer = document.getElementById('videos-container') || document.body;
-    var btnSetupNewRoom = document.getElementById('setup-new-room');
-    var roomsList = document.getElementById('rooms-list');
+    var minus = 130;
+    var windowHeight = 700;
+    var windowWidth = 600;
+    var windowAspectRatio = windowWidth / windowHeight;
+    var videoAspectRatio = 4 / 3;
+    var blockAspectRatio;
+    var tempVideoWidth = 0;
+    var maxVideoWidth = 0;
 
-    if (btnSetupNewRoom) btnSetupNewRoom.onclick = setupNewRoomButtonClickHandler;
-
-    function rotateVideo(video) {
-      video.style[navigator.mozGetUserMedia ? 'transform' : '-webkit-transform'] = 'rotate(0deg)';
-      setTimeout(function() {
-        video.style[navigator.mozGetUserMedia ? 'transform' : '-webkit-transform'] = 'rotate(360deg)';
-      }, 1000);
-    }
-
-    (function() {
-      var uniqueToken = document.getElementById('unique-token');
-      if (uniqueToken)
-      if (location.hash.length > 2) uniqueToken.parentNode.parentNode.parentNode.innerHTML = '<h2 style="text-align:center;"><a href="' + location.href + '" target="_blank">Share this link</a></h2>';
-      else uniqueToken.innerHTML = uniqueToken.parentNode.parentNode.href = '#' + (Math.random() * new Date().getTime()).toString(36).toUpperCase().replace( /\./g , '-');
-    })();
-
-    function scaleVideos() {
-      var videos = document.querySelectorAll('video'),
-      length = videos.length, video;
-
-      var minus = 130;
-      var windowHeight = 700;
-      var windowWidth = 600;
-      var windowAspectRatio = windowWidth / windowHeight;
-      var videoAspectRatio = 4 / 3;
-      var blockAspectRatio;
-      var tempVideoWidth = 0;
-      var maxVideoWidth = 0;
-
-      for (var i = length; i > 0; i--) {
-        blockAspectRatio = i * videoAspectRatio / Math.ceil(length / i);
-        if (blockAspectRatio <= windowAspectRatio) {
-          tempVideoWidth = videoAspectRatio * windowHeight / Math.ceil(length / i);
-        } else {
-          tempVideoWidth = windowWidth / i;
-        }
-        if (tempVideoWidth > maxVideoWidth)
-        maxVideoWidth = tempVideoWidth;
+    for (var i = length; i > 0; i--) {
+      blockAspectRatio = i * videoAspectRatio / Math.ceil(length / i);
+      if (blockAspectRatio <= windowAspectRatio) {
+        tempVideoWidth = videoAspectRatio * windowHeight / Math.ceil(length / i);
+      } else {
+        tempVideoWidth = windowWidth / i;
       }
-      for (var i = 0; i < length; i++) {
-        video = videos[i];
-        if (video)
-        video.width = maxVideoWidth - minus;
-      }
+      if (tempVideoWidth > maxVideoWidth)
+      maxVideoWidth = tempVideoWidth;
     }
+    for (var i = 0; i < length; i++) {
+      video = videos[i];
+      if (video)
+      video.width = maxVideoWidth - minus;
+    }
+  }
 
-    window.onresize = scaleVideos;
+  window.onresize = scaleVideos;
 
-    </script>
+  </script>
 
-  </article>
-  <!--
-  <canvas id="snapcanv" style="width:512;height:256;"></canvas>
+</article>
+<!--
+<canvas id="snapcanv" style="width:512;height:256;"></canvas>
 -->
-  Camera width fraction <input id="cameraW" type="text" value="0.3">
-  Camera height fraction <input id="cameraH" type="text" value="0.25">
-  <br>
-  Sensor Beta <input id="beta" type="text" value="">
-  Sensor Gamma <input id="gamma" type="text" value="">
-  Sensor Alpha <input id="alpha" type="text" value="">
-  <br>
-  Camera Z <input id="cameraZ" type="text" onchange="cameraPos();" value="0">
-  Camera X <input id="cameraX" type="text" onchange="cameraPos();" value="-1000">
-  Camera Y <input id="cameraY" type="text" onchange="cameraPos();" value="0">
-  Rotation X <input id="rotationX" type="text" onchange="rotate();" value="0">
-  Rotation Y <input id="rotationY" type="text" onchange="rotate();" value="0">
-  Rotation Z <input id="rotationZ" type="text" onchange="rotate();" value="0">
-   Euler <input id="euler" type="text" value="ZXY">
-  <div id="webgl"></div>
+Camera width fraction <input id="cameraW" type="text" value="0.3">
+Camera height fraction <input id="cameraH" type="text" value="0.25">
+<br>
+Sensor Beta <input id="beta" type="text" value="">
+Sensor Gamma <input id="gamma" type="text" value="">
+Sensor Alpha <input id="alpha" type="text" value="">
+<br>
+Camera Z <input id="cameraZ" type="text" onchange="cameraPos();" value="0">
+Camera X <input id="cameraX" type="text" onchange="cameraPos();" value="-1000">
+Camera Y <input id="cameraY" type="text" onchange="cameraPos();" value="0">
+Rotation X <input id="rotationX" type="text" onchange="rotate();" value="0">
+Rotation Y <input id="rotationY" type="text" onchange="rotate();" value="0">
+Rotation Z <input id="rotationZ" type="text" onchange="rotate();" value="0">
+Euler <input id="euler" type="text" value="ZXY">
+<div id="webgl"></div>
 
 
-  <!-- togetherjs -->
-      <script>
-        TogetherJSConfig_findRoom = {prefix: "ztee", max: 30};
-        TogetherJSConfig_autoStart = true;
-        TogetherJSConfig_suppressJoinConfirmation = true;
-        TogetherJSConfig_storagePrefix = "tjs_ztee";
-        TogetherJSConfig_suppressInvite = true;
-        TogetherJSConfig_dontShowClicks = true;
-      </script>
-  <script src="https://togetherjs.com/togetherjs-min.js"></script>
+<!-- togetherjs -->
+<script>
+TogetherJSConfig_findRoom = {prefix: "ztee", max: 30};
+TogetherJSConfig_autoStart = true;
+TogetherJSConfig_suppressJoinConfirmation = true;
+TogetherJSConfig_storagePrefix = "tjs_ztee";
+TogetherJSConfig_suppressInvite = true;
+TogetherJSConfig_dontShowClicks = true;
+</script>
+<script src="https://togetherjs.com/togetherjs-min.js"></script>
 
 <script>
 
@@ -377,14 +419,15 @@ TogetherJS.hub.on('orientation', function (msg) {
   //$("#rotationY").val(msg.alpha);
   //$("#rotationZ").val(msg.beta);
   rotate();
+  getcamera();
 });
 
-  //window.addEventListener('deviceorientation', handleOrientation);
+//window.addEventListener('deviceorientation', handleOrientation);
 </script>
 
-  <script>
-  document.getElementById('webgl').appendChild(renderer.domElement);
-  render();
-  </script>
+<script>
+document.getElementById('webgl').appendChild(renderer.domElement);
+render();
+</script>
 </body>
 </html>
