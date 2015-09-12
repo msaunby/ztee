@@ -101,6 +101,10 @@
     }
 
     function rotate(){
+      snap_no++;
+      snap_no = snap_no % snap_max;
+      console.log('tick', snap_no);
+      updateCanv( snap_no );
 
       for(var n=0; n<snap_max; n++){
         var snap = snaps[n];
@@ -168,10 +172,12 @@ function heartbeat(){
   }else if (vidSphere == null){
     vidSphere = loadVideo(mediaCamera, cameraWFrac, cameraHFrac);
   }else{
+    /*
     snap_no++;
     snap_no = snap_no % snap_max;
     console.log('tick', snap_no);
     updateCanv( snap_no );
+    */
   }
   setTimeout( function() {
     heartbeat();
