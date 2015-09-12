@@ -159,10 +159,10 @@ var vidSphere = null;
 var canv_no = 0;
 
 function heartbeat(){
-  remote.alpha += 20; // In degree in the range [0,360]
-  remote.beta = 0; // In degree in the range [-180,180]
-  remote.gamma = 0; // In degree in the range [-90,90]
   if(canv_no < snap_max){
+    remote.alpha += 20; // In degree in the range [0,360]
+    remote.beta = 0; // In degree in the range [-180,180]
+    remote.gamma = 0; // In degree in the range [-90,90]
     createCanv( canv_no );
     canv_no++;
   }else if (vidSphere == null){
@@ -175,7 +175,7 @@ function heartbeat(){
   }
   setTimeout( function() {
     heartbeat();
-  }, 500 );
+  }, 1000 );
 }
 
 function createCanv(n){
@@ -453,7 +453,7 @@ TogetherJS.hub.on('orientation', function (msg) {
   //$("#rotationY").val(msg.alpha);
   //$("#rotationZ").val(msg.beta);
   rotate();
-  getcamera();
+  //getcamera();
 });
 
 //window.addEventListener('deviceorientation', handleOrientation);
