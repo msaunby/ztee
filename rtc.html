@@ -208,7 +208,7 @@ function updateCanv(n){
   snap.sphere.material.map = THREE.ImageUtils.loadTexture(canvas.toDataURL());
   snap.sphere.material.map.minFilter = THREE.NearestFilter;
   snap.sphere.material.needsUpdate = true;
-
+  snaps[n] = snap;
 }
 
 function getcamera(){
