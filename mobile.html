@@ -254,14 +254,13 @@
     setTimeout( function() {
       heartbeat();
       beat_orientation = true;
-    }, 500 );
+    }, 600 );
   }
 
   heartbeat();
 
   function handleOrientation(event) {
     if(beat_orientation){
-      beat_orientation = false;
       if (TogetherJS.running) {
         TogetherJS.send({
           type: 'orientation',
@@ -270,7 +269,9 @@
           gamma: event.gamma
         });
       }
+      beat_orientation = false;
     }
+
   }
 
   window.addEventListener('deviceorientation', handleOrientation);
