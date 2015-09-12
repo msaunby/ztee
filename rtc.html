@@ -146,22 +146,36 @@
     createCanv( snap_no );
   }
   */
+  remote.alpha = -120; // In degree in the range [0,360]
+  remote.beta = 0; // In degree in the range [-180,180]
+  remote.gamma = 0; // In degree in the range [-90,90]
   heartbeat();
+
   console.log( mediaCamera.videoWidth, mediaCamera.videoHeight );
 
 }
 
+var vidSphere = null;
+var canv_no = 0;
 
 function heartbeat(){
-  if(snap_no < snap_max){
-    createCanv( snap_no );
-    snap_no++;
-    setTimeout( function() {
-      heartbeat();
-    }, 500 );
+  remote.alpha += 20; // In degree in the range [0,360]
+  remote.beta = 0; // In degree in the range [-180,180]
+  remote.gamma = 0; // In degree in the range [-90,90]
+  if(canv_no < snap_max){
+    createCanv( canv_no );
+    canv_no++;
+  }else if (vidSphere == null){
+    vidSphere = loadVideo(mediaCamera, cameraWFrac, cameraHFrac);
   }else{
-    loadVideo(mediaCamera, cameraWFrac, cameraHFrac);
+    snap_no++;
+    snap_no = snap_no % snap_max;
+    console.log('tick', snap_no);
+    updateCanv( snap_no );
   }
+  setTimeout( function() {
+    heartbeat();
+  }, 500 );
 }
 
 function createCanv(n){
@@ -177,7 +191,24 @@ function createCanv(n){
   snap.beta = remote.beta;
   snap.gamma = remote.gamma;
   snap.sphere = loadCanvas( canvas, n, cameraWFrac, cameraHFrac);
+  console.log(snap);
   snaps[n] = snap;
+}
+
+function updateCanv(n){
+  var snap = snaps[n];
+  snap.alpha = remote.alpha;
+  snap.beta = remote.beta;
+  snap.gamma = remote.gamma;
+  var canvas = document.createElement('canvas');
+  canvas.width = mediaCamera.videoWidth;
+  canvas.height = mediaCamera.videoHeight;
+  var ctx = canvas.getContext('2d');
+  ctx.drawImage(mediaCamera, 0, 0, canvas.width, canvas.height);
+  snap.sphere.material.map = THREE.ImageUtils.loadTexture(canvas.toDataURL());
+  snap.sphere.material.map.minFilter = THREE.NearestFilter;
+  snap.sphere.material.needsUpdate = true;
+
 }
 
 function getcamera(){
@@ -375,9 +406,10 @@ window.onresize = scaleVideos;
 Camera width fraction <input id="cameraW" type="text" value="0.3">
 Camera height fraction <input id="cameraH" type="text" value="0.25">
 <br>
-Sensor Beta <input id="beta" type="text" value="">
-Sensor Gamma <input id="gamma" type="text" value="">
-Sensor Alpha <input id="alpha" type="text" value="">
+Sensor Beta <input id="beta" type="text" value="0">
+Sensor Gamma <input id="gamma" type="text" value="0">
+Sensor Alpha <input id="alpha" type="text" value="0">
+<button id="rotate" onclick="rotate()">Rotate</button>
 <br>
 Camera Z <input id="cameraZ" type="text" onchange="cameraPos();" value="0">
 Camera X <input id="cameraX" type="text" onchange="cameraPos();" value="-1000">

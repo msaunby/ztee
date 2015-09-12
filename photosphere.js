@@ -18,29 +18,10 @@ var renderer = new THREE.WebGLRenderer();
 renderer.setSize(width, height);
 
 function render() {
-  //controls.update();
   requestAnimationFrame(render);
-  //sphere.rotation.y = Date.now() * 0.0001;
-
-  /*
-  if ( globe_vid.video.readyState === globe_vid.video.HAVE_ENOUGH_DATA ) {
-  globe_vid.imageContext.drawImage( globe_vid.video, -2, -2 );
-  globe_vid.texture.needsUpdate = true;
+  renderer.render(scene, camera);
+  //composer.render();
 }
-*/
-
-renderer.render(scene, camera);
-//composer.render();
-}
-
-//var basicMaterial;
-//var vidMaterial;
-
-
-// See http://threejs.org/docs/#Reference/Extras.Geometries/SphereGeometry
-
-//var heightFraction = 0.2;
-//var widthFraction = 0.2;
 
 
 loadCanvas = function( canvas, layernum, widthFraction, heightFraction ){
