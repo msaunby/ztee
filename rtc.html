@@ -109,9 +109,9 @@
       for(var n=0; n<snap_max; n++){
         var snap = snaps[n];
         var x = 0; //Number($("#gamma").val()) * Math.PI / 180.0;
-        var y = 720.0  + Number($("#alpha").val()); // ensures +ve after modulus.
+        var y = Number($("#alpha").val()); // ensures +ve after modulus.
         var z = Number($("#beta").val());
-        y = (Number($("#rotationY").val()) + y - snap.alpha) % 360;
+        y = (720 - (Number($("#rotationY").val()) + y - snap.alpha)) % 360;
         z = Number($("#rotationZ").val()) + z - snap.beta;
 
         //console.warn("ROTATION", [x, y, z]);
