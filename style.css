@@ -4,6 +4,11 @@
     font-weight: 400;
 }
 
+video {
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
+
 html {
     background: #eee;
 }
